@@ -2,15 +2,15 @@
 #
 set -euo pipefail
 
-for folder in $(ls -d -- */); do
+for folder in $(ls -d -- scenarios/*/); do
     echo "Cleaning $folder..."
     cd "$folder"
     terraform destroy -auto-approve || true
     terraform state rm $(terraform state list) || true
-    cd ..
+    cd -
 done
 
-for folder in $(ls -d -- */); do
+for folder in $(ls -d -- scenarios/*/); do
     echo "Running $folder..."
     cd "$folder"
     terraform init
@@ -19,5 +19,5 @@ for folder in $(ls -d -- */); do
         bash run.sh
     fi
     terraform destroy -auto-approve
-    cd ..
+    cd -
 done

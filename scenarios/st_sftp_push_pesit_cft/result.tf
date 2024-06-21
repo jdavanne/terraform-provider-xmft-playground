@@ -5,6 +5,12 @@ resource "local_file" "result" {
 #!/bin/bash
 #
 set -euo pipefail
+
+info() {
+  echo "INFO: $*" 1>&2
+  "$@"
+}
+
 TMPDIR=$(mktemp --directory)
 DATE=$(date +'%Y%m%d_%H%M%S')
 echo "Hello, World $DATE" >$TMPDIR/file.txt
@@ -21,7 +27,7 @@ echo "Wait CFT to receive file..."
 for i in $(seq 1 10); do
   echo "Try $i..."
   sleep 0.2
-  curl -s -k -u ${local.cft_admin_username}:${local.cft_admin_password} "${local.cft_api_url1}/cft/api/v1/transfers?idf=${xmft_st_transfer_profile.profile1.name}&fields=NFNAME,NSPART,NRPART,STATE,DATEB,TIMEB" | jq '.transfers[] | select(.nfname == "'"$FILENAME"'")' 
+  info curl -s -k -u ${local.cft_admin_username}:${local.cft_admin_password} "${local.cft_api_url1}/cft/api/v1/transfers?idf=${xmft_st_transfer_profile.profile1.name}&fields=NFNAME,NSPART,NRPART,STATE,DATEB,TIMEB" | jq '.transfers[] | select(.nfname == "'"$FILENAME"'")' 
   r="$(curl -s -k -u ${local.cft_admin_username}:${local.cft_admin_password} "${local.cft_api_url1}/cft/api/v1/transfers?idf=${xmft_st_transfer_profile.profile1.name}&fields=NFNAME,NSPART,NRPART,STATE,DATEB,TIMEB" | jq -r '.transfers[] | select(.nfname == "'"$FILENAME"'")' )"
   if [ -n "$r" ]; then
     echo "Found!"

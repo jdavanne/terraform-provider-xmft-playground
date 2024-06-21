@@ -39,7 +39,7 @@ resource "xmft_cftpart" "cft2" {
   provider = xmft.cft1
   name     = "cft2"
   prot     = "PESIT"
-  sap      = "1761"
+  sap      = local.cft_pesit_port2
 
   nrpart  = "CFT2"
   nrpassw = "cft2*"
@@ -49,7 +49,7 @@ resource "xmft_cftpart" "cft2" {
   tcp = [{
     id     = "1"
     cnxout = "100"
-    host   = "cft2"
+    host   = local.cft_host2
   }]
 }
 
@@ -57,7 +57,7 @@ resource "xmft_cftpart" "cft1" {
   provider = xmft.cft2
   name     = "cft1"
   prot     = "PESIT"
-  sap      = "1761"
+  sap      = local.cft_pesit_port1
 
   nrpart  = "CFT1"
   nrpassw = "cft1*"
@@ -67,7 +67,7 @@ resource "xmft_cftpart" "cft1" {
   tcp = [{
     id     = "1"
     cnxout = "100"
-    host   = "cft1"
+    host   = local.cft_host1
   }]
 }
 

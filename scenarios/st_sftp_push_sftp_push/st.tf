@@ -1,6 +1,3 @@
-locals {
-  scenario = "stpesitcft"
-}
 
 provider "xmft" {
   product  = "st"
@@ -12,19 +9,31 @@ provider "xmft" {
 
 resource "xmft_st_account" "account1" {
   provider    = xmft.st1
-  name        = "account46" #-${local.scenario}${local.suffix}"
-  home_folder = "${local.st_account_rootfs}/account1${local.scenario}${local.suffix}"
+  name        = "account1${local.suffix}"
+  home_folder = "${local.st_account_rootfs}/account1${local.suffix}"
   user = {
-    name = "login1-${local.scenario}${local.suffix}"
+    name = "login1${local.suffix}"
     password_credentials = {
       password = "password1"
     }
   }
 }
 
+resource "xmft_st_account" "account2" {
+  provider    = xmft.st1
+  name        = "account2${local.suffix}"
+  home_folder = "${local.st_account_rootfs}/account2${local.suffix}"
+  user = {
+    name = "login2${local.suffix}"
+    password_credentials = {
+      password = "password2"
+    }
+  }
+}
+
 resource "xmft_st_advanced_routing_application" "ar1" {
   provider       = xmft.st1
-  name           = "ar1-${local.scenario}"
+  name           = "ar1"
   type           = "AdvancedRouting"
   notes          = "generic tutu"
   business_units = []
@@ -32,7 +41,7 @@ resource "xmft_st_advanced_routing_application" "ar1" {
 
 resource "xmft_st_route_template" "template1" {
   provider       = xmft.st1
-  name           = "template1-${local.scenario}"
+  name           = "template1"
   description    = "generic template"
   business_units = []
 }
@@ -63,28 +72,21 @@ resource "xmft_st_route_simple" "simple1" {
   provider = xmft.st1
   steps = [{
     send_to_partner = {
-      transfer_site_expression         = "${xmft_st_site_pesit.pesit2.name}#!#CVD#!#"
-      transfer_profile_expression      = xmft_st_transfer_profile.profile1.name
-      transfer_profile_expression_type = "NAME"
-      max_parallel_clients             = 4
+      transfer_site_expression = "${xmft_st_site_ssh.ssh1.name}#!#CVD#!#"
+      max_parallel_clients     = 4
     }
   }]
 }
 
-resource "xmft_st_transfer_profile" "profile1" {
-  provider          = xmft.st1
-  name              = "FLOW1"
-  transfer_mode     = "BINARY"
-  account           = xmft_st_account.account1.name
-  file_label_option = "SEND_FILENAME"
-  depends_on        = [xmft_st_site_pesit.pesit2]
+resource "xmft_st_site_ssh" "ssh1" {
+  provider  = xmft.st1
+  name      = "ssh1"
+  account   = xmft_st_account.account1.name
+  host      = local.st_sftp_host
+  port      = local.st_sftp_port
+  user_name = xmft_st_account.account2.user.name
+  password  = xmft_st_account.account2.user.password_credentials.password
+  #download_folder  = "/download"
+  upload_folder = "/"
 }
 
-resource "xmft_st_site_pesit" "pesit2" {
-  provider        = xmft.st1
-  name            = "ST1"
-  account         = xmft_st_account.account1.name
-  host            = local.cft_host
-  port            = local.cft_port_pesit
-  server_password = "ST1*"
-}

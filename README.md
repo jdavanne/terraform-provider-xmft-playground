@@ -4,10 +4,10 @@ Playground to use xmft on various use cases
 
 ## Prerequisites
 
-1 Secure Tranport for ST scenarios
-2 CFTs for CFT scenarios
-terraform
-jq 
+- 1 Secure Tranport for ST scenarios
+- 2 CFTs for CFT scenarios
+- terraform
+- jq 
 
 ##
 
@@ -24,8 +24,10 @@ ST_ACCOUNT_ROOTFS="/files"
 SUFFIX= "21"
 CFT_API_URL1="https://<host>:1768"
 CFT_API_URL2="https://<host>:1769"
-CFT_HOST="<host>"
-CFT_PORT_PESIT="1761"
+CFT_HOST1="<host>"
+CFT_HOST2="<host>"
+CFT_PESIT_PORT1="1761"
+CFT_PESIT_PORT2="1762"
 CFT_ADMIN_USERNAME="admin"
 CFT_ADMIN_PASSWORD="changeit"
 ```

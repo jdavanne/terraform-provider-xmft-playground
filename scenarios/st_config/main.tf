@@ -47,7 +47,6 @@ resource "xmft_st_basic_application" "basic1" {
   business_units = []
 }
 
-/*
 resource "xmft_st_sentinel" "sentinel1" {
   provider           = xmft.st1
   enabled            = false
@@ -55,4 +54,35 @@ resource "xmft_st_sentinel" "sentinel1" {
   port               = "22"
   overflow_file_path = "/tmp/sentinel_overflow"
 }
-*/
+
+resource "tls_private_key" "rsa-1024-example" {
+  algorithm = "RSA"
+  rsa_bits  = 1024
+}
+
+resource "tls_self_signed_cert" "example" {
+  private_key_pem = tls_private_key.rsa-1024-example.private_key_pem
+
+  subject {
+    common_name  = "example.com"
+    organization = "ACME Examples, Inc"
+  }
+
+  validity_period_hours = 12
+
+  allowed_uses = [
+    "key_encipherment",
+    "digital_signature",
+    "server_auth",
+  ]
+}
+
+resource "xmft_st_certificate" "cert1" {
+  provider = xmft.st1
+  name     = "` + name + `"
+  account  = xmft_st_account.account1.name
+  type     = "x509"
+  usage    = "login"
+  #overwrite        = true
+  content = tls_self_signed_cert.example.cert_pem
+}

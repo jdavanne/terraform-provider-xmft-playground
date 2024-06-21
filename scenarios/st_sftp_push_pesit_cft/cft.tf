@@ -10,7 +10,6 @@ resource "xmft_cftpart" "st1" {
   provider = xmft.cft1
   name     = "st1"
   prot     = "PESIT"
-  sap      = "1761"
 
   nrpart  = upper(xmft_st_account.account1.name)
   nrpassw = "ST1*"
@@ -20,7 +19,8 @@ resource "xmft_cftpart" "st1" {
   tcp = [{
     id     = "1"
     cnxout = "100"
-    host   = "st1"
+    cnxin  = "100"
+    host   = "none"
   }]
 }
 
@@ -31,3 +31,4 @@ resource "xmft_cftrecv" "flow1" {
   fname    = "/tmp/&IDTU"
   ftype    = "B"
 }
+
