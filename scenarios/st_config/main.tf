@@ -25,6 +25,54 @@ resource "xmft_st_account" "account1" {
   }
 }
 
+resource "xmft_st_site_folder_monitoring" "site_folder_monitoring1" {
+  provider = xmft.st1
+  name     = "site_folder_monitoring1"
+  account  = xmft_st_account.account1.name
+
+  download_folder = "/download"
+  upload_folder   = "/upload"
+}
+
+resource "xmft_st_site_ssh" "ssh1" {
+  provider  = xmft.st1
+  name      = "ssh1"
+  account   = xmft_st_account.account1.name
+  host      = "remote-host"
+  port      = 22
+  user_name = "username1"
+  password  = "password1"
+  #download_folder  = "/download"
+  upload_folder = "/"
+}
+
+resource "xmft_st_site_pesit" "pesit1" {
+  provider        = xmft.st1
+  name            = "ST1"
+  account         = xmft_st_account.account1.name
+  host            = "remote-host"
+  port            = 1761
+  server_password = "ST1*"
+}
+
+resource "xmft_st_transfer_profile" "profile1" {
+  provider          = xmft.st1
+  name              = "FLOW1"
+  transfer_mode     = "BINARY"
+  account           = xmft_st_account.account1.name
+  file_label_option = "SEND_FILENAME"
+  depends_on        = [xmft_st_site_pesit.pesit1]
+}
+
+resource "xmft_st_user_class" "userclass1" {
+  provider  = xmft.st1
+  name      = "userclass1"
+  user_type = "real"
+  user_name = "user1"
+  group     = "group1"
+  address   = "192.168.1.1"
+}
+
 resource "xmft_st_advanced_routing_application" "ar1" {
   provider       = xmft.st1
   name           = "basic-ar1"
@@ -38,6 +86,38 @@ resource "xmft_st_route_template" "template1" {
   name           = "basic-template1"
   description    = "generic template"
   business_units = []
+}
+
+resource "xmft_st_subscription_ar" "sub1" {
+  provider    = xmft.st1
+  account     = xmft_st_account.account1.name
+  folder      = "/inbound"
+  application = xmft_st_advanced_routing_application.ar1.name
+}
+
+resource "xmft_st_route_composite" "route_composite1" {
+  provider       = xmft.st1
+  name           = "route1"
+  description    = "send to partner"
+  route_template = xmft_st_route_template.template1.id
+  subscriptions  = [xmft_st_subscription_ar.sub1.id]
+  account        = xmft_st_account.account1.name
+
+  steps = [{
+    execute_route_id = xmft_st_route_simple.simple1.id
+    }
+  ]
+}
+
+resource "xmft_st_route_simple" "simple1" {
+  name     = "simple1"
+  provider = xmft.st1
+  steps = [{
+    send_to_partner = {
+      transfer_site_expression = "${xmft_st_site_ssh.ssh1.name}#!#CVD#!#"
+      max_parallel_clients     = 4
+    }
+  }]
 }
 
 resource "xmft_st_basic_application" "basic1" {
@@ -54,6 +134,17 @@ resource "xmft_st_sentinel" "sentinel1" {
   port               = "22"
   overflow_file_path = "/tmp/sentinel_overflow"
 }
+
+resource "xmft_st_file_archiving" "archiving1" {
+  provider       = xmft.st1
+  archive_folder = "/tmp/archive"
+
+  global_archiving_policy              = "enabled"
+  delete_files_older_than              = 1
+  delete_files_older_than_unit         = "days"
+  maximum_file_size_allowed_to_archive = 0
+}
+
 
 resource "tls_private_key" "rsa-1024-example" {
   algorithm = "RSA"
@@ -79,10 +170,38 @@ resource "tls_self_signed_cert" "example" {
 
 resource "xmft_st_certificate" "cert1" {
   provider = xmft.st1
-  name     = "` + name + `"
+  name     = "cert1sample"
   account  = xmft_st_account.account1.name
   type     = "x509"
   usage    = "login"
   #overwrite        = true
   content = tls_self_signed_cert.example.cert_pem
 }
+
+resource "xmft_st_admin_role" "role1" {
+  provider          = xmft.st1
+  name              = "role1"
+  is_limited        = true
+  is_bounce_allowed = true
+  menus             = ["Server Log"]
+}
+
+resource "xmft_st_admin" "admin1" {
+  provider   = xmft.st1
+  name       = "admin1"
+  role_name  = xmft_st_admin_role.role1.name
+  is_limited = true
+  parent     = "admin"
+  password_credentials = {
+    password = "mypassword1"
+  }
+
+  administrator_rights = {
+    can_read_only    = false
+    is_maker         = true
+    can_create_users = true
+    can_update_users = true
+  }
+  depends_on = [xmft_st_admin_role.role1]
+}
+

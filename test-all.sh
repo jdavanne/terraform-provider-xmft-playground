@@ -2,6 +2,8 @@
 #
 set -euo pipefail
 
+./init.sh
+
 for folder in $(ls -d -- scenarios/*/); do
     echo "Cleaning $folder..."
     cd "$folder"

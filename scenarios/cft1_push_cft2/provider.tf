@@ -2,7 +2,7 @@ terraform {
   required_providers {
     xmft = {
       source  = "jdavanne/xmft"
-      version = "0.0.6"
+      version = "0.0.7"
     }
     local = {
       source = "hashicorp/local"
