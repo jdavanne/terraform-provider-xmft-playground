@@ -15,7 +15,7 @@ done
 for folder in $(ls -d -- scenarios/*/); do
     echo "Running $folder..."
     cd "$folder"
-    terraform init
+    terraform init -upgrade
     terraform apply -auto-approve
     if [ -f "run.sh" ]; then
         bash run.sh
