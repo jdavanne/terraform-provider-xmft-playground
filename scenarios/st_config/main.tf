@@ -55,6 +55,23 @@ resource "xmft_st_site_pesit" "pesit1" {
   server_password = "ST1*"
 }
 
+resource "xmft_st_site_custom" "s3_sample" {
+  count    = 0 # TODO: remove this to enable s3 site when supported
+  provider = xmft.st1
+  name     = "s3_sample"
+  protocol = "s3"
+  account  = xmft_st_account.account1.name
+  custom_properties = {
+    s3Bucket                   = "mybucket",
+    s3Region                   = "eu-west-3",
+    s3AccessKey                = "accesskey",
+    s3SecretKey                = "secretkey",
+    s3DownloadObjectKey        = "/s3_download",
+    s3VerifyCertificateEnabled = "true",
+    s3SslCipherSuites          = "TLS_AES_256_GCM_SHA384, TLS_AES_128_GCM_SHA256, TLS_CHACHA20_POLY1305_SHA256, TLS_AES_128_CCM_SHA256, TLS_AES_128_CCM_8_SHA256, TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384, TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384, TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256, TLS_DHE_RSA_WITH_AES_256_GCM_SHA384, TLS_DHE_DSS_WITH_AES_256_GCM_SHA384, TLS_DHE_DSS_WITH_AES_256_CBC_SHA256, TLS_DHE_RSA_WITH_AES_256_CBC_SHA256, TLS_DHE_RSA_WITH_AES_128_GCM_SHA256, TLS_DHE_DSS_WITH_AES_128_GCM_SHA256, TLS_DHE_DSS_WITH_AES_128_CBC_SHA256, TLS_DHE_RSA_WITH_AES_128_CBC_SHA256, TLS_RSA_WITH_AES_256_CBC_SHA256"
+  }
+}
+
 resource "xmft_st_transfer_profile" "profile1" {
   provider          = xmft.st1
   name              = "FLOW1"
