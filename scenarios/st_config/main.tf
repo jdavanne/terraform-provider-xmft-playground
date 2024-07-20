@@ -6,6 +6,11 @@ provider "xmft" {
   password = local.st_admin_password
 }
 
+locals {
+  has_s3_plugin         = true
+  has_azure_blob_plugin = true
+}
+
 resource "xmft_st_business_unit" "bu1" {
   provider    = xmft.st1
   name        = "bu1"
@@ -56,7 +61,7 @@ resource "xmft_st_site_pesit" "pesit1" {
 }
 
 resource "xmft_st_site_custom" "s3_sample" {
-  count    = 0 # TODO: remove this to enable s3 site when supported
+  count    = local.has_s3_plugin ? 1 : 0
   provider = xmft.st1
   name     = "s3_sample"
   protocol = "s3"
@@ -222,3 +227,30 @@ resource "xmft_st_admin" "admin1" {
   depends_on = [xmft_st_admin_role.role1]
 }
 
+locals {
+  options = {
+    "Ftp.preferBouncyCastleProvider"                                      = "false"
+    "Http.preferBouncyCastleProvider"                                     = "false"
+    "As2.preferBouncyCastleProvider"                                      = "false"
+    "Ssh.preferBouncyCastleProvider"                                      = "false"
+    "Pesit.preferBouncyCastleProvider"                                    = "false"
+    "TM.preferBouncyCastleProvider"                                       = "false"
+    "TransactionManager.fileIOBufferSizeInKB"                             = "256"
+    "TransactionManager.syncFileToDiskEveryKB"                            = "100000"
+    "TransactionManager.ThreadPools.ThreadPool.EventMonitor.maxThreads"   = "1024"
+    "EventQueue.ThreadPools.ThreadPool.maxThreads"                        = "1024"
+    "EventQueue.ThreadPools.AdvancedRouting.maxThreads"                   = "1024"
+    "TransactionManager.ThreadPools.ThreadPool.ServerTransfer.maxThreads" = "1024"
+    "TransactionManager.RuleEngine.pool"                                  = "64"
+    "EventQueue.SizeLimit.maxQueueSize"                                   = "10000"
+    "OutboundConnections.maxConnectionsPerHost"                           = "1024"
+    "Cluster.nodeListRefreshTime"                                         = "10"
+    "Cluster.Status.heartbeatTimeout"                                     = "60"
+  }
+}
+resource "xmft_st_conf_option" "options" {
+  for_each = local.options
+  provider = xmft.st1
+  name     = each.key
+  value    = each.value
+}
