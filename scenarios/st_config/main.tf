@@ -60,6 +60,30 @@ resource "xmft_st_site_pesit" "pesit1" {
   server_password = "ST1*"
 }
 
+resource "xmft_st_site_ftp" "ftp1" {
+  provider        = xmft.st1
+  name            = "ftp1"
+  account         = xmft_st_account.account1.name
+  host            = "remote-host"
+  port            = 21
+  user_name       = "username1"
+  password        = "password1"
+  download_folder = "/download"
+  upload_folder   = "/"
+}
+
+resource "xmft_st_site_http" "http1" {
+  provider        = xmft.st1
+  name            = "http1"
+  account         = xmft_st_account.account1.name
+  host            = "remote-host"
+  port            = 80
+  user_name       = "username1"
+  password        = "password1"
+  download_folder = "/download"
+  upload_folder   = "/"
+}
+
 resource "xmft_st_site_custom" "s3_sample" {
   count    = local.has_s3_plugin ? 1 : 0
   provider = xmft.st1
@@ -159,7 +183,7 @@ resource "xmft_st_sentinel" "sentinel1" {
 
 resource "xmft_st_file_archiving" "archiving1" {
   provider       = xmft.st1
-  archive_folder = "/tmp/archive"
+  archive_folder = "${local.st_account_rootfs}/archives"
 
   global_archiving_policy              = "enabled"
   delete_files_older_than              = 1

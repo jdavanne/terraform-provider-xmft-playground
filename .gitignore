@@ -2,3 +2,4 @@
 .vscode
 terraform.tfstate*
 .terraform*
+/test

@@ -17,17 +17,24 @@ init() {
 
 clean() {
     for folder in $(ls -d -- scenarios/*/); do
+        echo
+        echo "************************************************************************"
         echo "Cleaning $folder..."
+        echo "************************************************************************"
         cd "$folder"
         terraform destroy -auto-approve || true
-        terraform state rm $(terraform state list) || true
+        echo "Cleaning state..."
+        terraform state rm $(terraform state list) > /dev/null 2>&1 || true
         cd -
     done
 }
 
 test() {
     for folder in $(ls -d -- scenarios/*/); do
+        echo
+        echo "************************************************************************"
         echo "Running $folder..."
+        echo "************************************************************************"
         cd "$folder"
         terraform init -upgrade
         terraform apply -auto-approve
@@ -35,6 +42,7 @@ test() {
             bash run.sh
         fi
         terraform destroy -auto-approve
+        terraform state rm $(terraform state list) || true
         cd -
     done
 }
@@ -50,6 +58,7 @@ case ${1:-} in
         init
         clean
         test
+        echo "*** TEST-ALL SUCCESSFULL ***"
     ;;
     *) ## help
         echo "Usage: $(basename "$0") [init|clean|test-all]"
