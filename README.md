@@ -2,6 +2,10 @@
 
 Playground to use xmft on various use cases 
 
+
+- https://registry.terraform.io/providers/jdavanne/xmft
+- https://github.com/jdavanne/terraform-provider-xmf
+
 ## Prerequisites
 
 - 1 Secure Tranport for ST scenarios
